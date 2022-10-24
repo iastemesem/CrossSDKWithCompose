@@ -2,14 +2,13 @@ package com.nttdata.techcorner_droidcon.feature.home.presentation.home
 
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,8 +40,13 @@ fun HomeListView(vm: HomeViewModel) {
             )
         },
         containerColor = Color.LightGray,
-    ) { innerPadding ->
-        LazyColumn(Modifier.padding(top = innerPadding.calculateTopPadding())) {
+        floatingActionButton = {
+            FloatingActionButton(onClick = { Log.d("GIAN", "HomeListView: ") }) {
+                Icon(imageVector = Icons.Filled.ShoppingCart, contentDescription = "Cart")
+            }
+        }
+    ) { padding ->
+        LazyColumn(Modifier.padding(top = padding.calculateTopPadding())) {
             items(vm.movies.size) { index ->
                 BuildFilmItemView(vm, index)
             }
@@ -89,8 +93,22 @@ private fun BuildFilmItemView(
                     Text(movie.voteAverage)
                     Text(movie.voteCount)
                     Text(movie.releaseDate)
-                    FloatingActionButton(onClick = { Log.d("GIAN", "BuildFilmItemView: ") }) {
-                        Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 8.dp)
+                    ) {
+                        Icon(
+                            modifier = Modifier
+                                .background(
+                                    color = FloatingActionButtonDefaults.containerColor,
+                                    shape = FloatingActionButtonDefaults.shape
+                                )
+                                .padding(all = 8.dp),
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Add",
+                        )
                     }
                 }
             }
