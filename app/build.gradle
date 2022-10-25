@@ -49,6 +49,8 @@ android {
 
 dependencies {
 
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'com.google.guava:guava:31.1-android'
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
@@ -69,6 +71,9 @@ dependencies {
 
     //LOAD IMAGE FROM URL
     implementation("io.coil-kt:coil-compose:2.0.0-rc01")
+
+    //FUTURES
+    implementation("androidx.concurrent:concurrent-futures-ktx:1.1.0")
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
