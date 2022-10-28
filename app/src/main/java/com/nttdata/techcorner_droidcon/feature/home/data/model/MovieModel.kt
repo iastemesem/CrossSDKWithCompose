@@ -34,6 +34,7 @@ fun Result.toMovie(): Movie {
     return Movie(
         title = this.title,
         description = this.overview,
+        briefDescription = this.overview.substring(0, 60),
         adultOnly = this.adult,
         backgroundImageUrl = this.backdrop_path,
         originalLanguage = this.original_language,

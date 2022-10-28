@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.core.content.ContextCompat
+import com.google.ambient.crossdevice.discovery.DeviceFilter
 import com.google.ambient.crossdevice.sessions.*
 import com.google.ambient.crossdevice.wakeup.StartComponentRequest
 import com.google.common.util.concurrent.FutureCallback
@@ -118,14 +119,14 @@ class SessionTwoUsersMovieManager(context: Context) : MovieManager {
     }
 
     override fun findOtherDevices() {
-        movieData!!.getMovieState().value = MovieData.MovieState.SEARCHING
+        //movieData!!.getMovieState().value = MovieData.MovieState.SEARCHING
 
         val sessionId = sessions!!.createSession(null)
         Futures.addCallback(
             sessions!!.shareSessionFuture(
                 sessionId,
-                StartComponentRequest.Builder().setAction(_action).setReason("Reason").build(),
-                emptyList(),
+                StartComponentRequest.Builder().setAction(_action).setReason("Scegli il dispositivo con il quale condividere la tua sessione").build(),
+                listOf(/*DeviceFilter.trustRelationshipFilter(DeviceFilter.TrustRelationshipType.MY_DEVICES_ONLY)*/),
                 primarySessionStateCallback
             ),
             object : FutureCallback<PrimarySession> {
@@ -162,7 +163,8 @@ class SessionTwoUsersMovieManager(context: Context) : MovieManager {
     /**
      * Gets the SecondarySession and uses it to get the RemoteConnection.
      */
-    private fun getSecondarySessionAndRemoteConnection(intent: Intent) {
+    private fun
+            getSecondarySessionAndRemoteConnection(intent: Intent) {
         Futures.addCallback(
             sessions!!.getSecondarySessionFuture(intent, secondarySessionStateCallback),
             object : FutureCallback<SecondarySession> {

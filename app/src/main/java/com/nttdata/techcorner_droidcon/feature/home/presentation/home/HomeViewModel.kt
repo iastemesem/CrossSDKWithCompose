@@ -22,10 +22,18 @@ class HomeViewModel constructor(
         private const val KEY_ROUNDS_COMPLETED = "ROUNDS_COMPLETED"
     }
 
-    private var localMovieChoice: String = ""
+    enum class HomeState {
+        LOADING,
+        LOADED,
+        ERROR
+    }
+
+
+    private var localMovieChoice: String = "1234567890"
     private var remoteMovieChoice: String = ""
     private var localMovieChoiceConfirmed: Boolean = false
     private var movieState = MutableLiveData(MovieData.MovieState.DISCONNECTED)
+    var homeState = MutableLiveData(HomeState.LOADING)
 
     val movies: List<Movie>
         get() = _movies
@@ -33,7 +41,9 @@ class HomeViewModel constructor(
     suspend fun getMovies() {
         viewModelScope.launch {
             try {
-                _movies.addAll(getMoviesUseCase())
+                val movies = getMoviesUseCase()
+                _movies.addAll(movies)
+                homeState.postValue(HomeState.LOADED)
             } catch (e: Exception) {
 
             }

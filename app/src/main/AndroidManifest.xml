@@ -22,8 +22,11 @@
             android:theme="@style/Theme.TechCornerDroidcon">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.nttdata.techcorner_droidcon.SESSIONS_TWO_USERS_WAKEUP"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
     </application>

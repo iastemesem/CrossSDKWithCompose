@@ -1,32 +1,33 @@
 package com.nttdata.techcorner_droidcon.feature.home.presentation.home
 
 import android.util.Log
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalUnitApi::class)
 @Composable
-fun HomeListView(vm: HomeViewModel) {
+fun HomeListView(
+    vm: HomeViewModel,
+    talkbackEnabled: Boolean
+) {
     LaunchedEffect(Unit, block = {
         vm.getMovies()
     })
@@ -34,82 +35,90 @@ fun HomeListView(vm: HomeViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(text = "Movies")
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color(
+                        0xFFFFC107
+                    )
+                ),
+                title = {},
+                actions = {
+                    Row() {
+                        if (talkbackEnabled)
+                            IconButton(onClick = { Log.d("GIAN", "on add to cart clicked") }) {
+                                Icon(
+                                    modifier = Modifier
+                                        .padding(all = 8.dp)
+                                        .semantics {
+                                            onClick(label = "per visualizzare il carrello") {
+                                                Log.d("GIAN", "on cart clicked")
+                                                return@onClick true
+                                            }
+                                        },
+                                    tint = Color.White,
+                                    imageVector = Icons.Filled.ShoppingCart,
+                                    contentDescription = "carrello"
+                                )
+                            }
+
+                        IconButton(onClick = { Log.d("GIAN", "HomeListView: ") }) {
+                            Icon(
+                                modifier = Modifier
+                                    .padding(all = 8.dp)
+                                    .semantics {
+                                        onClick(label = "per condividere la tua sessione") {
+                                            Log.d("GIAN", "on share clicked")
+                                            return@onClick true
+                                        }
+                                    },
+                                tint = Color.White,
+                                imageVector = Icons.Filled.Share,
+                                contentDescription = "condividi"
+                            )
+                        }
+
+                    }
                 },
             )
+
         },
-        containerColor = Color.LightGray,
+        containerColor = Color(0xFFFFC107),
         floatingActionButton = {
-            FloatingActionButton(onClick = { Log.d("GIAN", "HomeListView: ") }) {
-                Icon(imageVector = Icons.Filled.ShoppingCart, contentDescription = "Cart")
+            FloatingActionButton(
+                onClick = { Log.d("GIAN", "on cart clicked") },
+                modifier = Modifier.semantics {
+                    onClick(label = "per visualizzare il carrello") {
+                        Log.d("GIAN", "on cart clicked")
+                        return@onClick true
+                    }
+                },
+                containerColor = Color(0xFFFFAB40)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.ShoppingCart,
+                    contentDescription = "Carrello",
+                    tint = Color.White
+                )
             }
         }
     ) { padding ->
-        LazyColumn(Modifier.padding(top = padding.calculateTopPadding())) {
-            items(vm.movies.size) { index ->
-                BuildFilmItemView(vm, index)
-            }
-        }
-
-    }
-}
-
-@OptIn(ExperimentalUnitApi::class)
-@Composable
-private fun BuildFilmItemView(
-    vm: HomeViewModel,
-    index: Int
-) {
-    val movie = vm.movies[index]
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        shape = RoundedCornerShape(10.dp),
-        modifier = Modifier
-            .padding(all = 8.dp)
-    ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.padding(
+                top = padding.calculateTopPadding(),
+                end = 20.dp,
+                start = 20.dp
+            )
         ) {
-            Row(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
-                Image(
-                    painter = rememberAsyncImagePainter("https://image.tmdb.org/t/p/original${movie.posterImageUrl}"),
-                    contentDescription = null,
-                    modifier = Modifier.size(width = 150.dp, height = 150.dp)
+            Text(
+                modifier = Modifier.padding(top = 10.dp),
+                text = "Movies", style = TextStyle(
+                    color = Color.White,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = TextUnit(value = 28f, type = TextUnitType.Sp)
                 )
-                Column(modifier = Modifier.padding(start = 4.dp)) {
-                    Text(
-                        text = movie.title,
-                        style = TextStyle(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = TextUnit(value = 20f, type = TextUnitType.Sp)
-                        )
-                    )
-                    Text(
-                        text = movie.description,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(movie.voteAverage)
-                    Text(movie.voteCount)
-                    Text(movie.releaseDate)
-                    Row(
-                        horizontalArrangement = Arrangement.End,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 8.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier
-                                .background(
-                                    color = FloatingActionButtonDefaults.containerColor,
-                                    shape = FloatingActionButtonDefaults.shape
-                                )
-                                .padding(all = 8.dp),
-                            imageVector = Icons.Filled.Add,
-                            contentDescription = "Add",
-                        )
-                    }
+            )
+            LazyColumn() {
+                items(vm.movies.size) { index ->
+                    MovieItemView(vm.movies[index], vm)
                 }
             }
         }
