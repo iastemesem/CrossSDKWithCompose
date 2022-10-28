@@ -42,7 +42,7 @@ class HomeViewModel constructor(
         viewModelScope.launch {
             try {
                 val movies = getMoviesUseCase()
-                _movies.addAll(movies)
+                _movies.addAll(movies.shuffled())
                 homeState.postValue(HomeState.LOADED)
             } catch (e: Exception) {
 

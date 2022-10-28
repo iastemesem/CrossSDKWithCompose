@@ -78,7 +78,7 @@ fun MovieItemView(movie: Movie, viewModel: HomeViewModel) {
 
             Spacer(modifier = Modifier.height(height = 4.dp))
 
-            Column(modifier = Modifier
+            Row(modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
                 .semantics(mergeDescendants = true) {}) {
@@ -133,6 +133,7 @@ fun MovieItemView(movie: Movie, viewModel: HomeViewModel) {
     }
 }
 
+@OptIn(ExperimentalUnitApi::class, ExperimentalMaterial3Api::class)
 @Composable
 private fun MovieItemDetail(
     movie: Movie,
@@ -140,16 +141,23 @@ private fun MovieItemDetail(
     mContentDescription: String,
     icon: ImageVector
 ) {
-    Row() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier
-                .size(width = 20.dp, height = 20.dp)
+                .size(width = 25.dp, height = 25.dp)
         )
         Spacer(modifier = Modifier.width(10.dp))
-        Text(modifier = Modifier.semantics {
-            contentDescription = mContentDescription
-        }, text = content)
+        Text(
+            modifier = Modifier.semantics {
+                contentDescription = mContentDescription
+            }, text = content,
+            style = TextStyle(
+                fontWeight = FontWeight.Light,
+                fontSize = TextUnit(value = 16f, type = TextUnitType.Sp)
+            )
+        )
+        Spacer(modifier = Modifier.width(10.dp))
     }
 }
