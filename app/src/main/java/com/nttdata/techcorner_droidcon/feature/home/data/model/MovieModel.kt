@@ -32,6 +32,7 @@ data class Result(
 
 fun Result.toMovie(): Movie {
     return Movie(
+        id = this.id,
         title = this.title,
         description = this.overview,
         briefDescription = this.overview.substring(0, 60),

@@ -25,7 +25,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.nttdata.techcorner_droidcon.SESSIONS_TWO_USERS_WAKEUP"/>
+                <action android:name="movies_share_action"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>

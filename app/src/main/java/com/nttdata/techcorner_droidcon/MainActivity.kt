@@ -7,12 +7,12 @@ import android.util.Log
 import android.view.accessibility.AccessibilityManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
 import com.nttdata.techcorner_droidcon.feature.home.data.data_source.remote.HomeRemoteDataSourceImpl
 import com.nttdata.techcorner_droidcon.feature.home.data.repository.HomeRepositoryImpl
 import com.nttdata.techcorner_droidcon.feature.home.domain.use_case.GetMovies
 import com.nttdata.techcorner_droidcon.feature.home.presentation.home.HomeListView
 import com.nttdata.techcorner_droidcon.feature.home.presentation.home.HomeViewModel
-import com.nttdata.techcorner_droidcon.feature.home.presentation.model.SessionTwoUsersMovieManager
 import com.nttdata.techcorner_droidcon.ui.theme.TechCornerDroidconTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,7 +26,8 @@ class MainActivity : ComponentActivity() {
                 repository = HomeRepositoryImpl(
                     dataSource = HomeRemoteDataSourceImpl()
                 )
-            )
+            ),
+            context = this
         )
 
         val accessibilityManager =
@@ -50,12 +51,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIntent(intent: Intent?) {
-        Log.d("GIAN     ", "handleIntent: ")
         intent?.let {
             Log.d("GIAN", "handleIntent: ${intent.action}")
-            if (SessionTwoUsersMovieManager._action.equals(intent.action, ignoreCase = true)) {
-                //sessionManager.acceptSessionInvitation(intent)
-            }
+            if (HomeViewModel.SHARE_ACTION.equals(intent.action, ignoreCase = true))
+                vm.handleIntent(intent);
         }
     }
 }

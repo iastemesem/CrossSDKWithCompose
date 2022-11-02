@@ -1,6 +1,7 @@
 package com.nttdata.techcorner_droidcon.feature.home.domain.entity
 
 data class Movie(
+    val id: Int,
     val title: String,
     val description: String,
     val briefDescription: String,

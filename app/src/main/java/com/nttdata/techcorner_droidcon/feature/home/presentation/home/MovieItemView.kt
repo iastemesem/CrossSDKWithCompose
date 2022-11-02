@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -29,7 +30,7 @@ import com.nttdata.techcorner_droidcon.feature.home.domain.entity.Movie
 
 @OptIn(ExperimentalUnitApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MovieItemView(movie: Movie, viewModel: HomeViewModel) {
+fun MovieItemView(movie: Movie, vm: HomeViewModel) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
         shape = RoundedCornerShape(15.dp),
@@ -83,19 +84,16 @@ fun MovieItemView(movie: Movie, viewModel: HomeViewModel) {
                 .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
                 .semantics(mergeDescendants = true) {}) {
                 MovieItemDetail(
-                    movie = movie,
                     content = movie.voteAverage,
                     mContentDescription = "Media voto ${movie.voteAverage}",
                     icon = Icons.Filled.Star
                 )
                 MovieItemDetail(
-                    movie = movie,
                     content = movie.voteCount,
                     mContentDescription = "Conteggio voti ${movie.voteCount}",
                     icon = Icons.Filled.Person
                 )
                 MovieItemDetail(
-                    movie = movie,
                     content = movie.releaseDate,
                     mContentDescription = "Data di rilascio ${movie.releaseDate}",
                     icon = Icons.Filled.DateRange
@@ -111,16 +109,32 @@ fun MovieItemView(movie: Movie, viewModel: HomeViewModel) {
                     .padding(end = 12.dp, start = 12.dp, bottom = 12.dp)
             ) {
                 Button(
-                    onClick = { Log.d("GIAN", "add clicked: ") },
+                    modifier = Modifier.semantics {
+                        onClick("${movie.title}, Rimosso dal carrello") {
+                            vm.onRemoveClicked(movie.id)
+                            return@onClick true
+                        }
+                    },
+                    onClick = {
+                        vm.onRemoveClicked(movie.id)
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFFFAB40)
-                    )
+                    ),
                 ) {
-                    Text(text = "Elimina")
+                    Text(text = "Rimuovi")
                 }
                 Spacer(modifier = Modifier.width(width = 8.dp))
                 Button(
-                    onClick = { Log.d("GIAN", "add clicked: ") },
+                    modifier = Modifier.semantics {
+                        onClick("${movie.title}, Aggiunto al carrello") {
+                            vm.onAddClicked(movie.id)
+                            return@onClick true
+                        }
+                    },
+                    onClick = {
+                        vm.onAddClicked(movie.id)
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFFFAB40)
                     )
@@ -133,10 +147,9 @@ fun MovieItemView(movie: Movie, viewModel: HomeViewModel) {
     }
 }
 
-@OptIn(ExperimentalUnitApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalUnitApi::class)
 @Composable
 private fun MovieItemDetail(
-    movie: Movie,
     content: String,
     mContentDescription: String,
     icon: ImageVector
