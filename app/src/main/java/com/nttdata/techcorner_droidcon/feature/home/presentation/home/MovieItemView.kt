@@ -1,6 +1,7 @@
 package com.nttdata.techcorner_droidcon.feature.home.presentation.home
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,6 +11,8 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,13 +34,18 @@ import com.nttdata.techcorner_droidcon.feature.home.domain.entity.Movie
 @OptIn(ExperimentalUnitApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MovieItemView(movie: Movie, vm: HomeViewModel) {
+    val moviesCartId = vm.moviesCartId
     Card(
         colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
         shape = RoundedCornerShape(15.dp),
         modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+        border = if (moviesCartId.isNotEmpty() && moviesCartId.contains(movie.id)) BorderStroke(
+            1.dp,
+            color = Color.Green
+        ) else null,
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         onClick = {
-            Log.d("GIAN", "on card clicked: ")
+
         }) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
@@ -115,6 +123,7 @@ fun MovieItemView(movie: Movie, vm: HomeViewModel) {
                             return@onClick true
                         }
                     },
+                    enabled = moviesCartId.isNotEmpty() && moviesCartId.contains(movie.id),
                     onClick = {
                         vm.onRemoveClicked(movie.id)
                     },
@@ -132,6 +141,7 @@ fun MovieItemView(movie: Movie, vm: HomeViewModel) {
                             return@onClick true
                         }
                     },
+                    enabled = moviesCartId.isEmpty() || !moviesCartId.contains(movie.id),
                     onClick = {
                         vm.onAddClicked(movie.id)
                     },

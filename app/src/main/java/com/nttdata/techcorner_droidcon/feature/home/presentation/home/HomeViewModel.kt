@@ -22,6 +22,7 @@ class HomeViewModel constructor(
 ) : ViewModel(), MovieData {
     private val _movies = mutableStateListOf<Movie>()
     private var activePrimarySession: PrimarySession? = null
+    private var activeSecondarySession: SecondarySession? = null
     private var sessions: Sessions = Sessions.create(context = context)
 
     companion object {
@@ -51,7 +52,10 @@ class HomeViewModel constructor(
     private var movieState = MutableLiveData(MovieData.MovieState.DISCONNECTED)
     var homeState = MutableLiveData(HomeState.LOADING)
     private var _movieCartList = mutableListOf<Int>()
+    var moviesCartId = mutableStateListOf<Int>()
     var cartCounter = MutableLiveData<String>("0")
+    var showAddSnackBar = MutableLiveData(Pair<Boolean, String?>(false, null))
+    var showRemoveSnackBar = MutableLiveData(Pair<Boolean, String?>(false, null))
 
     val movies: MutableLiveData<List<Movie>>
         get() = MutableLiveData<List<Movie>>(_movies)
@@ -60,7 +64,7 @@ class HomeViewModel constructor(
         viewModelScope.launch {
             try {
                 val movies = getMoviesUseCase()
-                _movies.addAll(movies.shuffled())
+                _movies.addAll(movies)
                 homeState.postValue(HomeState.LOADED)
             } catch (e: Exception) {
 
@@ -81,28 +85,45 @@ class HomeViewModel constructor(
     }
 
     fun onAddClicked(movieId: Int) {
-        _movieCartList.add(movieId);
-        cartCounter.value = _movieCartList.size.toString()
-        viewModelScope.launch {
-            activePrimarySession?.getSecondaryRemoteConnections()?.get(0)?.send(
-                "A $movieId".toString().toByteArray(
-                    UTF_8
+        val added = _movieCartList.add(movieId)
+        if (added) {
+            moviesCartId.add(movieId)
+            cartCounter.value = _movieCartList.size.toString()
+            viewModelScope.launch {
+                activePrimarySession?.getSecondaryRemoteConnections()?.get(0)?.send(
+                    "A $movieId".toByteArray(
+                        UTF_8
+                    )
                 )
-            )
+
+                activeSecondarySession?.getDefaultRemoteConnection()?.send(
+                    "A $movieId".toByteArray(
+                        UTF_8
+                    )
+                )
+            }
         }
     }
 
     fun onRemoveClicked(movieId: Int) {
         val removed = _movieCartList.remove(movieId)
-        cartCounter.value = _movieCartList.size.toString()
-        if (removed)
+        if (removed) {
+            moviesCartId.remove(movieId)
+            cartCounter.value = _movieCartList.size.toString()
             viewModelScope.launch {
                 activePrimarySession?.getSecondaryRemoteConnections()?.get(0)?.send(
-                    "R $movieId".toString().toByteArray(
+                    "R $movieId".toByteArray(
+                        UTF_8
+                    )
+                )
+
+                activeSecondarySession?.getDefaultRemoteConnection()?.send(
+                    "R $movieId".toByteArray(
                         UTF_8
                     )
                 )
             }
+        }
     }
 
     fun findOtherDevices() {
@@ -122,9 +143,9 @@ class HomeViewModel constructor(
 
     fun handleIntent(intent: Intent) {
         viewModelScope.launch {
-            val secondarySession =
+            activeSecondarySession =
                 sessions.getSecondarySession(intent, MoviesSecondaryShareSessionStateCallback())
-            val remoteConnection = secondarySession.getDefaultRemoteConnection()
+            val remoteConnection = activeSecondarySession!!.getDefaultRemoteConnection()
 
             remoteConnection.registerReceiver(
                 object : SessionConnectionReceiver {
@@ -132,20 +153,36 @@ class HomeViewModel constructor(
                         participant: SessionParticipant,
                         payload: ByteArray
                     ) {
-                        val payloadReceived = String(payload)
-                        Log.d(TAG, "Payload received: $payloadReceived")
-                        val movieIdFromPayload = payloadReceived.removeRange(0, 2)
-                        if (payloadReceived.startsWith("A")) {
-                            _movieCartList.add(movieIdFromPayload.toInt())
-                        } else if (payloadReceived.startsWith("R")) {
-                            _movieCartList.remove(movieIdFromPayload.toInt())
-                        }
-
-                        cartCounter.value = _movieCartList.size.toString()
+                        handlePayloadReceived(payload, getPrimarySessionName().value)
                     }
                 }
             )
         }
+
+    }
+
+    private fun handlePayloadReceived(payload: ByteArray, name: String?) {
+        val payloadReceived = String(payload)
+        Log.d(TAG, "Payload received: $payloadReceived")
+        val movieIdFromPayload = payloadReceived.removeRange(0, 2)
+        var movieTitle: String? = ""
+        if (payloadReceived.startsWith("A")) {
+            _movieCartList.add(movieIdFromPayload.toInt())
+            moviesCartId.add(movieIdFromPayload.toInt())
+            movieTitle =
+                movies.value?.find { movie -> movie.id == movieIdFromPayload.toInt() }?.title
+            showAddSnackBar.value = Pair(true, movieTitle)
+            showRemoveSnackBar.value = Pair(false, movieTitle)
+        } else if (payloadReceived.startsWith("R")) {
+            _movieCartList.remove(movieIdFromPayload.toInt())
+            moviesCartId.remove(movieIdFromPayload.toInt())
+            movieTitle =
+                movies.value?.find { movie -> movie.id == movieIdFromPayload.toInt() }?.title
+            showRemoveSnackBar.value = Pair(true, movieTitle)
+            showAddSnackBar.value = Pair(false, movieTitle)
+        }
+
+        cartCounter.value = _movieCartList.size.toString()
 
     }
 
@@ -190,6 +227,7 @@ class HomeViewModel constructor(
                             participant: SessionParticipant,
                             payload: ByteArray
                         ) {
+                            handlePayloadReceived(payload, getSecondarySessionName().value)
                             val ok = payload.contentEquals("ok".toByteArray(UTF_8))
                             Log.d(TAG, "Session share initialized. ok=$ok: ")
 

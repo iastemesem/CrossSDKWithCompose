@@ -1,6 +1,8 @@
 package com.nttdata.techcorner_droidcon.feature.home.presentation.home
 
 import android.util.Log
+import android.widget.Toast
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -32,6 +35,9 @@ fun HomeListView(
 ) {
     val cartCounter: String? by vm.cartCounter.observeAsState(null)
     val movieList: List<Movie>? by vm.movies.observeAsState(null)
+    val showAddSnackBar: Pair<Boolean, String?> by vm.showAddSnackBar.observeAsState(Pair(false, null))
+    val showRemoveSnackBar: Pair<Boolean, String?> by vm.showRemoveSnackBar.observeAsState(Pair(false, null))
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -100,7 +106,6 @@ fun HomeListView(
                 onClick = { Log.d("GIAN", "on cart clicked") },
                 modifier = Modifier.semantics {
                     onClick(label = "per visualizzare il carrello") {
-                        Log.d("GIAN", "on cart clicked")
                         return@onClick true
                     }
                 },
@@ -124,15 +129,35 @@ fun HomeListView(
             vm.getMovies()
         })
 
-        LazyColumn(
-            modifier = Modifier.padding(
-                top = padding.calculateTopPadding(),
-                end = 20.dp,
-                start = 20.dp
+        Column() {
+            LazyColumn(
+                modifier = Modifier.padding(
+                    top = padding.calculateTopPadding(),
+                    end = 20.dp,
+                    start = 20.dp
+                )
+            ) {
+                items(movieList!!.size) { index ->
+                    MovieItemView(movieList!![index], vm)
+                }
+            }
+            val toast = Toast.makeText(
+                LocalContext.current,
+                "",
+                Toast.LENGTH_SHORT
             )
-        ) {
-            items(movieList!!.size) { index ->
-                MovieItemView(movieList!![index], vm)
+            if (showAddSnackBar.first) {
+                Log.d("TECH_CORNER", "HomeListView: showAddSnackBar")
+                toast.cancel()
+                toast.setText("${showAddSnackBar.second} è stato aggiunto!")
+                toast.show()
+            }
+
+            if (showRemoveSnackBar.first) {
+                Log.d("TECH_CORNER", "HomeListView: showAddSnackBar")
+                toast.cancel()
+                toast.setText("${showRemoveSnackBar.second} è stato rimosso!")
+                toast.show()
             }
         }
     }
