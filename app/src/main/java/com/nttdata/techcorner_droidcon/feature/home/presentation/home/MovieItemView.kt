@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
@@ -76,6 +77,7 @@ fun MovieItemView(movie: Movie, vm: HomeViewModel) {
 
                 Text(
                     text = movie.description,
+                    modifier = Modifier.clearAndSetSemantics { this.contentDescription = "" },
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     style = TextStyle(
@@ -118,7 +120,7 @@ fun MovieItemView(movie: Movie, vm: HomeViewModel) {
             ) {
                 Button(
                     modifier = Modifier.semantics {
-                        onClick("${movie.title}, Rimosso dal carrello") {
+                        onClick("per rimuovere ${movie.title} dal carrello") {
                             vm.onRemoveClicked(movie.id)
                             return@onClick true
                         }
@@ -136,7 +138,7 @@ fun MovieItemView(movie: Movie, vm: HomeViewModel) {
                 Spacer(modifier = Modifier.width(width = 8.dp))
                 Button(
                     modifier = Modifier.semantics {
-                        onClick("${movie.title}, Aggiunto al carrello") {
+                        onClick("per aggiungere ${movie.title} al carrello") {
                             vm.onAddClicked(movie.id)
                             return@onClick true
                         }
